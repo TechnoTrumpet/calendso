@@ -1,8 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 
-import stripe from "@ee/lib/stripe/server";
-
 import { getSession } from "@lib/auth";
+import { STRIPE } from "@lib/integrations/payment/constants/stripeConstats";
 import prisma from "@lib/prisma";
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
@@ -36,7 +35,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
      * since the email is not an unique field in Stripe and we don't save them
      * in our DB as of now.
      **/
-    const customersReponse = await stripe.customers.list({
+    const customersReponse = await STRIPE.customers.list({
       email: user?.email || "",
       limit: 1,
     });
@@ -49,7 +48,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       });
 
     const return_url = `${process.env.BASE_URL}/settings/billing`;
-    const stripeSession = await stripe.billingPortal.sessions.create({
+    const stripeSession = await STRIPE.billingPortal.sessions.create({
       customer: customer.id,
       return_url,
     });
